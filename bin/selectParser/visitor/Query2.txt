@@ -1,0 +1,10 @@
+select doctype.SEQID, doctype.DOCTYPEID as TYPEID, doc.ATTACHEDTOOBJECTID as PROJECTID ,
+          doctype.DOCTYPENAME as TYPENAME, doc.FILENAME, doc.RECORDTIME, doc.RECORDMEN, doc.DOCID
+  from 
+  (select childDoc.doctypeid,parentDoc.doctypename,seqid,childDoc.doctypename doctypenm,parentDoc.seqid seq from 
+  (select DOCTYPEID,DOCTYPENAME,seqId from PM_T_DOCUMENTTYPE where PROJECTTYPEID=1 and seqid is not null   ) parentDoc,
+  (select DOCTYPEID,DOCTYPENAME,parentdoctype from PM_T_DOCUMENTTYPE where PROJECTTYPEID=1 and seqid is  null ) childDoc 
+   where childDoc.parentdoctype=parentDoc.doctypeid ) doctype
+  left join
+  (select docid,doctypeid,filename,ATTACHEDTOOBJECTID,RECORDTIME ,RECORDMEN from PM_T_DOCUMENTS  where doctype=3 and attachedtoobjectid = $C(name=attObjID)) doc
+  on doc.doctypeid=doctype.doctypeid order by seqid desc,doc.doctypeid 

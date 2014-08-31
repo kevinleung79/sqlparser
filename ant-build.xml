@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="selectParser" default="all">
+	
+	<!--=======================================================================-->
+	<property file="ant-build.properties" />
+	<property file="${source.java}/selectParser-version.properties" />
+	
+	<!--=======================================================================-->
+	<target name="init">
+		<tstamp> 
+			<format property="today" pattern="yyyyMMdd"/> 
+			<format property="now" pattern="yyyy-MM-dd hh:mm:ss"/> 
+		</tstamp> 
+		<echo message="Building on ${os.name} at ${now}" />
+		<delete dir="${temp.dir}" />
+		<mkdir dir="${base.dir}" />
+		
+		<propertyfile file="${source.java}/selectParser-version.properties">
+			<entry  key="version" value="2.0-${today}"/>
+		</propertyfile>
+	</target>
+
+	<!--=======================================================================-->
+	<target name="check-out" depends="init" description="Check out the sources from CVS"> 
+		<cvspass cvsroot="${cvs.root}" password="${cvs.password}" passfile="ant-cvs.cvspass" /> 
+		<cvs cvsRoot="${cvs.root}" passfile="ant-cvs.cvspass" 
+					 command="commit -m '${today}' ./src/selectParser-version.properties"/>
+		<cvs cvsRoot="${cvs.root}" package="${cvs.projectName}" command="checkout" dest="${base.dir}" 
+			 output="ant-cvs.log" passfile="ant-cvs.cvspass" tag="${cvs.tag}" failonerror="true" /> 
+	</target> 
+	
+	<!--=======================================================================-->
+	<target name="compile" depends="check-out" description="Compile the sources">
+		<mkdir dir="${temp.dir}/classes" />	
+		
+		<javac debug="on" includes="**/*.java" destdir="${temp.dir}/classes" source="1.4" encoding="UTF-8">
+			<src path="${source.java}" />
+			<classpath>
+				<fileset dir="${junit.lib}" includes="**/*.jar" />
+			</classpath>
+		</javac>
+		<copy todir="${temp.dir}/classes">
+			<fileset dir="${source.java}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<!--=======================================================================-->
+	<target name="jar" depends="compile" description="Create jar file">
+		<delete dir="${target.dir}" />
+		<mkdir dir="${target.dir}" />
+		<jar destfile="${target.dir}/selectParser.jar" compress="true">
+			<fileset dir="${temp.dir}/classes">
+			</fileset>
+		</jar>
+		<delete dir="${libjar_target.dir}" />
+		<mkdir dir="${libjar_target.dir}" />
+		<copy todir="${libjar_target.dir}">
+			<fileset dir="${target.dir}">
+				<include name="selectParser.jar" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<!--=======================================================================-->
+	<target name="java-src" depends="jar" description="Create src jar">
+		<zip destfile="${target.dir}/selectParser-src.jar">
+			<fileset dir="${source.java}">
+			</fileset>
+		</zip>
+		<delete dir="${srcjar_target.dir}" />
+		<mkdir dir="${srcjar_target.dir}" />
+		<copy todir="${srcjar_target.dir}">
+			<fileset dir="${target.dir}">
+				<include name="selectParser-src.jar" />
+			</fileset>
+		</copy>		
+	</target>
+
+	<!--=======================================================================-->
+	<target name="all" depends="jar,java-src">
+	</target>	
+</project>
