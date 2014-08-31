@@ -1,9 +1,0 @@
-PARSER_BEGIN( Parser_1 )
-public class Parser_1 {}
-PARSER_END( Parser_1 )
-void simpleLang() : {}             { integerLiteral() 
-                                   ( ( "+" | "-" ) integerLiteral() )* <EOF> }
-void integerLiteral() : {Token t;} { t=<INT> 
-                                   { System.out.println("integer = "+t.image); }}
-SKIP 	: { " " | "\t" | "\n" | "\r" }
-TOKEN	: { < INT : ( ["0" - "9"] )+ > }
